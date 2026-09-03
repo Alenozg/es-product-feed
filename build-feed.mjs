@@ -1,4 +1,5 @@
 import { writeFile } from "node:fs/promises";
+import { createHash } from "node:crypto";
 
 const SITE = "https://evliliksepetim.com";
 const SITEMAP_URL = `${SITE}/sitemap/products/0.xml`;
@@ -38,7 +39,8 @@ async function fetchProductItem(url) {
   if (!product || !product.offers) return null;
 
   const description = extractMeta(html, "description") || product.name;
-  const id = new URL(url).pathname.replace(/^\/|\/$/g, "");
+  const slug = new URL(url).pathname.replace(/^\/|\/$/g, "");
+  const id = createHash("sha1").update(slug).digest("hex").slice(0, 16);
   const images = Array.isArray(product.image) ? product.image : [product.image].filter(Boolean);
   const availability = product.offers.availability?.includes("InStock") ? "in stock" : "out of stock";
 
