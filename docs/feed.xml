@@ -941,5 +941,20 @@
     <g:brand>evlilik sepetim</g:brand>
     <g:identifier_exists>false</g:identifier_exists>
   </item>
+
+  <item>
+    <g:id>34899be79f7b35a5</g:id>
+    <title>Dijital Anı Kutusu – Fotoğraf, Video ve Sesli Mesaj Albümü</title>
+    <description>Düğün, nişan ve özel günleriniz için dijital anı kutusu oluşturun. Misafirleriniz karekodla fotoğraf, video, ses ve mesaj bıraksın.</description>
+    <link>https://evliliksepetim.com/dijital-anı-kutusu-–-fotoğraf-video-ve-sesli-mesaj-albümü</link>
+    <g:image_link>https://static.ticimax.cloud/79464/uploads/urunresimleri/buyuk/dijital-ani-kutusu-fotograf-video-ve-s-38-f93.png</g:image_link>
+    <g:additional_image_link>https://static.ticimax.cloud/79464/uploads/urunresimleri/buyuk/dijital-ani-kutusu-fotograf-video-ve-s-2-42c8.png</g:additional_image_link>
+    <g:additional_image_link>https://static.ticimax.cloud/79464/uploads/urunresimleri/buyuk/dijital-ani-kutusu-fotograf-video-ve-s-c0c878.png</g:additional_image_link>
+    <g:availability>in stock</g:availability>
+    <g:price>2000.00 TRY</g:price>
+    <g:condition>new</g:condition>
+    <g:brand>evlilik sepetim</g:brand>
+    <g:identifier_exists>false</g:identifier_exists>
+  </item>
 </channel>
 </rss>
