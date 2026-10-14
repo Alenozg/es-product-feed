@@ -25,6 +25,28 @@ function extractJsonLd(html) {
   return null;
 }
 
+function decodeEntities(str) {
+  return String(str || "")
+    .replace(/&#39;/g, "'")
+    .replace(/&quot;/g, '"')
+    .replace(/&amp;/g, "&")
+    .replace(/&nbsp;/g, " ");
+}
+
+// Türkçe büyük harfli kategori adlarını ("ÇİÇEK ŞEKİLLİ MUMLAR") okunur hâle getirir.
+function trTitle(str) {
+  const lower = String(str || "").trim().toLocaleLowerCase("tr-TR");
+  return lower.replace(/(^|[\s&(-])(\p{L})/gu, (m, sep, ch) => sep + ch.toLocaleUpperCase("tr-TR"));
+}
+
+// Sayfadaki BreadcrumbList'ten (Anasayfa ve ürünün kendisi hariç) kategori yolunu çıkarır.
+function extractBreadcrumb(html) {
+  const list = html.match(/<ul class="breadcrumb"[\s\S]*?<\/ul>/i);
+  if (!list) return [];
+  const names = [...list[0].matchAll(/itemprop=['"]name['"]>([^<]*)</g)].map((m) => decodeEntities(m[1]).trim());
+  return names.slice(1, -1).filter(Boolean);
+}
+
 function extractMeta(html, name) {
   const re = new RegExp(`<meta name="${name}" content="([^"]*)"`, "i");
   const m = html.match(re);
@@ -38,7 +60,14 @@ async function fetchProductItem(url) {
   const product = extractJsonLd(html);
   if (!product || !product.offers) return null;
 
-  const description = extractMeta(html, "description") || product.name;
+  const longDescription = decodeEntities(product.description || "").replace(/\s+/g, " ").trim();
+  const description = (longDescription.length > 60 ? longDescription : extractMeta(html, "description") || longDescription || product.name).slice(0, 4900);
+  const categories = extractBreadcrumb(html);
+  const productType = categories.map(trTitle).join(" > ");
+  // İade politikası etiketi: kişiye özel üretilen ürünler iade edilemez (Mesafeli Sözleşmeler Yönetmeliği md. 15),
+  // mum ve aksesuar gibi standart ürünlerde 14 gün iade geçerli. Etiketler Merchant Center'daki iade politikalarıyla eşleşir.
+  const top = (categories[0] || "").toLocaleUpperCase("tr-TR");
+  const returnLabel = /MUMLAR|AKSESUAR/.test(top) ? "standart-iade" : "kisiye-ozel";
   const slug = new URL(url).pathname.replace(/^\/|\/$/g, "");
   const id = createHash("sha1").update(slug).digest("hex").slice(0, 16);
   const images = Array.isArray(product.image) ? product.image : [product.image].filter(Boolean);
@@ -54,7 +83,9 @@ async function fetchProductItem(url) {
     price: `${Number(product.offers.price).toFixed(2)} ${(product.offers.priceCurrency || "TRY").toUpperCase()}`,
     availability,
     condition: "new",
-    brand: product.brand?.name || "Evlilik Sepetim",
+    brand: "Evlilik Sepetim",
+    product_type: productType,
+    return_label: returnLabel,
   };
 }
 
@@ -87,6 +118,7 @@ ${it.additional_images.map((img) => `    <g:additional_image_link>${xmlEscape(im
     <g:price>${it.price}</g:price>
     <g:condition>${it.condition}</g:condition>
     <g:brand>${xmlEscape(it.brand)}</g:brand>
+${it.product_type ? `    <g:product_type>${xmlEscape(it.product_type)}</g:product_type>\n` : ""}    <g:return_policy_label>${it.return_label}</g:return_policy_label>
     <g:identifier_exists>false</g:identifier_exists>
   </item>`
     )
