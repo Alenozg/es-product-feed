@@ -66,8 +66,11 @@ async function fetchProductItem(url) {
   const productType = categories.map(trTitle).join(" > ");
   // İade politikası etiketi: kişiye özel üretilen ürünler iade edilemez (Mesafeli Sözleşmeler Yönetmeliği md. 15),
   // mum ve aksesuar gibi standart ürünlerde 14 gün iade geçerli. Etiketler Merchant Center'daki iade politikalarıyla eşleşir.
+  // Kişiye özel yazı/fotoğraf formu zorunlu olan mumlar (kartlı mumlar, etiketli hediyelikler, polaroid kart) da kişiye özeldir.
+  // "İsteğe Bağlı Kişiselleştirme" formlu buketler ve formsuz mumlar standart iadededir.
   const top = (categories[0] || "").toLocaleUpperCase("tr-TR");
-  const returnLabel = /MUMLAR|AKSESUAR/.test(top) ? "standart-iade" : "kisiye-ozel";
+  const personalizedForm = /Kişiye Özel Yazı Bilgileri|Fotoğraflı Kart Bilgileri/.test(html);
+  const returnLabel = /MUMLAR|AKSESUAR/.test(top) && !personalizedForm ? "standart-iade" : "kisiye-ozel";
   const slug = new URL(url).pathname.replace(/^\/|\/$/g, "");
   const id = createHash("sha1").update(slug).digest("hex").slice(0, 16);
   const images = Array.isArray(product.image) ? product.image : [product.image].filter(Boolean);
