@@ -69,7 +69,8 @@ async function fetchProductItem(url) {
   // Kişiye özel yazı/fotoğraf formu zorunlu olan mumlar (kartlı mumlar, etiketli hediyelikler, polaroid kart) da kişiye özeldir.
   // "İsteğe Bağlı Kişiselleştirme" formlu buketler ve formsuz mumlar standart iadededir.
   const top = (categories[0] || "").toLocaleUpperCase("tr-TR");
-  const personalizedForm = /Kişiye Özel Yazı Bilgileri|Fotoğraflı Kart Bilgileri/.test(html);
+  // Ticimax sayfa verisindeki form numarası: 13 = Kişiye Özel Yazı Bilgileri, 19 = Fotoğraflı Kart Bilgileri.
+  const personalizedForm = /"formId":(13|19)\b/.test(html);
   const returnLabel = /MUMLAR|AKSESUAR/.test(top) && !personalizedForm ? "standart-iade" : "kisiye-ozel";
   const slug = new URL(url).pathname.replace(/^\/|\/$/g, "");
   const id = createHash("sha1").update(slug).digest("hex").slice(0, 16);
