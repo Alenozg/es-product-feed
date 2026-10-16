@@ -2,6 +2,9 @@ name: Build product feed
 
 on:
   schedule:
+    # Merchant Center beslemeyi her gece 00:08 (TR) çekiyor; GitHub zamanlaması saatlerce gecikebildiği için
+    # 21:00 (TR) çalışması o çekimden önce güncel listeyi hazırlar. 06:00 (TR) çalışması gün içi değişiklikler için kalır.
+    - cron: "0 18 * * *"
     - cron: "0 3 * * *"
   workflow_dispatch: {}
 
