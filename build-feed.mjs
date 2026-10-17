@@ -53,6 +53,28 @@ function extractMeta(html, name) {
   return m ? m[1].replace(/&#39;/g, "'").replace(/&amp;/g, "&") : "";
 }
 
+// Google ürün kategorisi (taxonomy ID, https://www.google.com/basepages/producttype/taxonomy-with-ids.en-US.txt).
+// Yol haritası ve ürün adına göre seçilir; uymayan ürüne (dijital ürün, hizmet) kategori yazılmaz.
+function googleCategory(categories, title) {
+  const path = categories.join(" > ").toLocaleUpperCase("tr-TR");
+  const name = String(title || "").toLocaleLowerCase("tr-TR");
+  if (/MUMLAR/.test(path) || /\bmum\b|mumu|mumlar/.test(name)) return "588"; // Home & Garden > Decor > Home Fragrances > Candles
+  if (/AKSESUAR/.test(path)) {
+    if (/kalem|markör/.test(name)) return "543608"; // Office Supplies > ... > Markers
+    if (/şövale/.test(name)) return "968"; // Office Supplies > Presentation Supplies > Easels
+    if (/kalp|ahşap|yaprak|figür/.test(name)) return "505404"; // Arts & Crafts > ... > Craft Wood & Shapes
+    return "96"; // Arts & Entertainment > Party & Celebration > Party Supplies
+  }
+  if (/DİJİTAL|HİZMET/.test(path)) return "";
+  if (/anı kutusu/.test(name) || /ANI KUTULARI/.test(path)) {
+    if (/ÖĞRETMEN|BEBEK|SÜNNET|DOĞUM GÜNÜ/.test(path) || /öğretmen|bebek|sünnet|doğum günü/.test(name)) return "2559"; // Party & Celebration > Gift Giving
+    return "96"; // Party & Celebration > Party Supplies (düğün, nişan, kına)
+  }
+  if (/OKUL|SINIF/.test(path)) return "500044"; // Home & Garden > Decor > Artwork > Posters, Prints, & Visual Artwork
+  if (/KARŞILAMA|MİSAFİR/.test(path) || /karşılama|anı panosu/.test(name)) return "96";
+  return "";
+}
+
 async function fetchProductItem(url) {
   const resp = await fetch(url, { headers: { "User-Agent": "Mozilla/5.0 (compatible; EvlilikSepetimFeedBot/1.0)" } });
   if (!resp.ok) return null;
@@ -89,6 +111,7 @@ async function fetchProductItem(url) {
     condition: "new",
     brand: "Evlilik Sepetim",
     product_type: productType,
+    google_product_category: googleCategory(categories, product.name),
     return_label: returnLabel,
   };
 }
@@ -122,7 +145,7 @@ ${it.additional_images.map((img) => `    <g:additional_image_link>${xmlEscape(im
     <g:price>${it.price}</g:price>
     <g:condition>${it.condition}</g:condition>
     <g:brand>${xmlEscape(it.brand)}</g:brand>
-${it.product_type ? `    <g:product_type>${xmlEscape(it.product_type)}</g:product_type>\n` : ""}    <g:return_policy_label>${it.return_label}</g:return_policy_label>
+${it.google_product_category ? `    <g:google_product_category>${it.google_product_category}</g:google_product_category>\n` : ""}${it.product_type ? `    <g:product_type>${xmlEscape(it.product_type)}</g:product_type>\n` : ""}    <g:return_policy_label>${it.return_label}</g:return_policy_label>
     <g:identifier_exists>false</g:identifier_exists>
   </item>`
     )
