@@ -72,6 +72,7 @@ function googleCategory(categories, title) {
   }
   if (/OKUL|SINIF/.test(path)) return "500044"; // Home & Garden > Decor > Artwork > Posters, Prints, & Visual Artwork
   if (/KARŞILAMA|MİSAFİR/.test(path) || /karşılama|anı panosu/.test(name)) return "96";
+  if (/DAVETİYE|BASKILI|GAZETE/.test(path) || /gazete|hikaye kartı|dev yüz/.test(name)) return "96"; // düğün gazetesi, hikaye kartı, dev yüz kartonu
   return "";
 }
 
